@@ -12,35 +12,46 @@ def getDistanciaEntreClientes(cliente1, cliente2, clientes):
 
 # Função para calcular o tempo de entrega entre a sede e um cliente
 def calcularTempoEntrega(cliente, clientes):
-    distancia_sede_cliente = getDistanciaEntreClientes(0, cliente, clientes)
+    sede = clientes[0]['posicao']  # Posição da sede (índice 0)
+    posicao_cliente = clientes[cliente]['posicao']  # Posição do cliente
+
+    # Extrair as coordenadas x, y da sede e do cliente
+    x_sede, y_sede = sede
+    x_cliente, y_cliente = posicao_cliente
+
+    # Calcular a distância entre a sede e o cliente
+    distancia_sede_cliente = getDistancia(x_sede, y_sede, x_cliente, y_cliente)
+
     # Simulação do tempo de entrega considerando 1 unidade de distância = 1 minuto de tempo de entrega
     return distancia_sede_cliente
 
 # Função para calcular a satisfação do cliente com base no tempo de entrega
-def getSatisfacao(cliente, tempo_entrega, clientes):
-    tempo_tolerancia = getDistanciaEntreClientes(0, cliente, clientes) * 1.5
-
+def getSatisfacao(cliente1, cliente2, tempo_entrega, clientes):
+    tempo_tolerancia = getDistanciaEntreClientes(cliente1, cliente2, clientes) * 1.5    
+   
     if tempo_entrega == tempo_tolerancia:
-        return 8
+        return 6  # Saída para entrega no tempo de tolerância
     elif tempo_entrega < tempo_tolerancia / 2:
-        return 10
-    elif tempo_tolerancia >= tempo_entrega >= tempo_tolerancia / 2:
-        return 8
-    else:
+        return 10  # Saída para entrega antes da metade do tempo de tolerância
+    elif tempo_entrega > tempo_tolerancia:  # Atraso
         atraso_percentual = (tempo_entrega - tempo_tolerancia) / tempo_tolerancia
 
-        if atraso_percentual <= 0.05:
-            return 7
-        elif atraso_percentual <= 0.1:
-            return 6
+        if atraso_percentual <= 0.1:
+            return 5  # Saída para 10% ou menos de atraso
         elif atraso_percentual <= 0.2:
-            return 5
-        elif atraso_percentual <= 0.3:
-            return 4
+            return 4  # Saída para 20% ou menos de atraso
         elif atraso_percentual <= 0.4:
-            return 3
+            return 3  # Saída para 40% ou menos de atraso
+        elif atraso_percentual <= 0.6:
+            return 2  # Saída para 60% ou menos de atraso
+        elif atraso_percentual <= 0.8:
+            return 1  # Saída para 80% ou menos de atraso
         else:
-            return 2
+            return 0  # Saída para mais de 100% de atraso
+    else:  # Tempo entre a metade e o tempo de tolerância
+        return 8  # Saída para entrega entre a metade e o tempo de tolerância
+
+
 
 
 
@@ -103,12 +114,27 @@ clientes_30 = {
 # Função para calcular a satisfação de todos os clientes
 def getSatisfacaoTodosClientes(clientes):
     satisfacao_clientes = {}
-    for cliente in clientes:
-        if cliente > 0:  # Ignorar a sede da empresa
-            tempo_entrega = calcularTempoEntrega(cliente, clientes)
-            satisfacao = getSatisfacao(cliente, tempo_entrega, clientes)
-            satisfacao_clientes[cliente] = satisfacao
+    ordem_clientes = list(clientes.keys())  # Obtendo a ordem dos clientes
+
+    for i in range(len(ordem_clientes) - 1):
+        cliente_atual = ordem_clientes[i]
+        proximo_cliente = ordem_clientes[i + 1]
+
+        # Corrigindo a chamada da função calcularTempoEntrega() para passar apenas dois argumentos
+        tempo_entrega = calcularTempoEntrega(proximo_cliente, clientes)
+        satisfacao = getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
+
+        satisfacao_clientes[cliente_atual] = satisfacao
+
     return satisfacao_clientes
+
+# Chame a função corrigida passando os dados corretos dos clientes
+satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
+
+# Exibindo a satisfação de todos os clientes
+for cliente, satisfacao in satisfacao_todos_clientes.items():
+    print(f"Satisfação do cliente {cliente}: {satisfacao}")
+
 
 # Calculando a satisfação de todos os clientes
 satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
