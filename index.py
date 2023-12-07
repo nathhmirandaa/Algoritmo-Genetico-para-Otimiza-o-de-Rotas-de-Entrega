@@ -1,56 +1,6 @@
+import random
 import math
-
-# Função para calcular a distância euclidiana entre dois pontos
-def getDistancia(x1, y1, x2, y2):
-    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-
-# Função para calcular a distância entre dois clientes usando os índices
-def getDistanciaEntreClientes(cliente1, cliente2, clientes):
-    x1, y1 = clientes[cliente1]['posicao']
-    x2, y2 = clientes[cliente2]['posicao']
-    return getDistancia(x1, y1, x2, y2)
-
-# Função para calcular o tempo de entrega entre a sede e um cliente
-def calcularTempoEntrega(cliente, clientes):
-    sede = clientes[0]['posicao']  # Posição da sede (índice 0)
-    posicao_cliente = clientes[cliente]['posicao']  # Posição do cliente
-
-    # Extrair as coordenadas x, y da sede e do cliente
-    x_sede, y_sede = sede
-    x_cliente, y_cliente = posicao_cliente
-
-    # Calcular a distância entre a sede e o cliente
-    distancia_sede_cliente = getDistancia(x_sede, y_sede, x_cliente, y_cliente)
-
-    # Simulação do tempo de entrega considerando 1 unidade de distância = 1 minuto de tempo de entrega
-    return distancia_sede_cliente
-
-# Função para calcular a satisfação do cliente com base no tempo de entrega
-def getSatisfacao(cliente1, cliente2, tempo_entrega, clientes):
-    tempo_tolerancia = getDistanciaEntreClientes(cliente1, cliente2, clientes) * 1.5    
-   
-    if tempo_entrega == tempo_tolerancia:
-        return 6  # Saída para entrega no tempo de tolerância
-    elif tempo_entrega < tempo_tolerancia / 2:
-        return 10  # Saída para entrega antes da metade do tempo de tolerância
-    elif tempo_entrega > tempo_tolerancia:  # Atraso
-        atraso_percentual = (tempo_entrega - tempo_tolerancia) / tempo_tolerancia
-
-        if atraso_percentual <= 0.1:
-            return 5  # Saída para 10% ou menos de atraso
-        elif atraso_percentual <= 0.2:
-            return 4  # Saída para 20% ou menos de atraso
-        elif atraso_percentual <= 0.4:
-            return 3  # Saída para 40% ou menos de atraso
-        elif atraso_percentual <= 0.6:
-            return 2  # Saída para 60% ou menos de atraso
-        elif atraso_percentual <= 0.8:
-            return 1  # Saída para 80% ou menos de atraso
-        else:
-            return 0  # Saída para mais de 100% de atraso
-    else:  # Tempo entre a metade e o tempo de tolerância
-        return 8  # Saída para entrega entre a metade e o tempo de tolerância
-
+random.seed(10)
 
 # Base de dados dos clientes
 clientes_5 = {
@@ -77,7 +27,6 @@ clientes_10 = {
     10: {'posicao': [2, 25], 'pedido': 3},
 }
 
-# Base de dados dos clientes (30 clientes)
 clientes_30 = {
     0: {'posicao': [0, 0]},  # Sede da empresa
     1: {'posicao': [1, 13], 'pedido': 4},
@@ -107,94 +56,152 @@ clientes_30 = {
     29: {'posicao': [25, 15], 'pedido': 2},
     30: {'posicao': [8, 3], 'pedido': 3}
 }
+#Facilitar na hora de rodar outro banco de dados
+cliente_atual = clientes_30
 
-# Função para calcular a satisfação de todos os clientes
-def getSatisfacaoTodosClientes(clientes):
-    satisfacao_clientes = {}
-    ordem_clientes = list(clientes.keys())  # Obtendo a ordem dos clientes
+# Função para calcular a distância euclidiana entre dois pontos
+def getDistancia(x1, y1, x2, y2):
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-    for i in range(len(ordem_clientes) - 1):
-        cliente_atual = ordem_clientes[i]
-        proximo_cliente = ordem_clientes[i + 1]
+# Função para calcular a distância entre dois clientes usando os índices
+def getDistanciaEntreClientes(cliente1, cliente2, clientes):
+    x1, y1 = clientes[cliente1]['posicao']
+    x2, y2 = clientes[cliente2]['posicao']
+    return getDistancia(x1, y1, x2, y2)
+
+# Função para calcular o tempo de entrega entre a sede e um cliente
+def calcularTempoEntrega(cliente, clientes): 
+    #print(clientes)
+    sede = clientes[0]['posicao']  # Posição da sede (índice 0)
+   
+    posicao_cliente = clientes[cliente]['posicao']  # Posição do cliente
+
+    # Extrair as coordenadas x, y da sede e do cliente
+    x_sede, y_sede = sede
+    x_cliente, y_cliente = posicao_cliente
+
+    # Calcular a distância entre a sede e o cliente
+    distancia_sede_cliente = getDistancia(x_sede, y_sede, x_cliente, y_cliente)
+
+    # Simulação do tempo de entrega considerando 1 unidade de distância = 1 minuto de tempo de entrega
+    return distancia_sede_cliente
+
+# Função para calcular a satisfação do cliente com base no tempo de entrega
+def getSatisfacao(cliente1, cliente2, tempo_entrega, clientes):
+    tempo_tolerancia = getDistanciaEntreClientes(cliente1, cliente2, clientes) * 1.5    
+   
+    if tempo_entrega == tempo_tolerancia:
+        return 6  # Saída para entrega no tempo de tolerância
+    elif tempo_entrega < tempo_tolerancia / 2:
+        return 10  # Saída para entrega antes da metade do tempo de tolerância
+    elif tempo_entrega > tempo_tolerancia: 
+        if(tempo_tolerancia == 0):
+           atraso_percentual = tempo_entrega # Atraso
+        else:
+            atraso_percentual = (tempo_entrega - tempo_tolerancia) / tempo_tolerancia
+
+        if atraso_percentual <= 0.1:
+            return 5  # Saída para 10% ou menos de atraso
+        elif atraso_percentual <= 0.2:
+            return 4  # Saída para 20% ou menos de atraso
+        elif atraso_percentual <= 0.4:
+            return 3  # Saída para 40% ou menos de atraso
+        elif atraso_percentual <= 0.6:
+            return 2  # Saída para 60% ou menos de atraso
+        elif atraso_percentual <= 0.8:
+            return 1  # Saída para 80% ou menos de atraso
+        else:
+            return 0  # Saída para mais de 100% de atraso
+    else:  # Tempo entre a metade e o tempo de tolerância
+        return 8  # Saída para entrega entre a metade e o tempo de tolerância
+
+
+def inicializarPopulacao(tamanho_populacao, clientes):
+    populacao = []
+    ordem_entrega = []
+    for _ in range(tamanho_populacao):
+        
+        ordem_entrega = list(cliente_atual.keys())
+       
+        for i in range(0, random.randint(1,10) ):
+            ordem_entrega.append(0 )
+        
+        random.shuffle(ordem_entrega)
+        populacao.append([ordem_entrega, 0])
+
+    return populacao
+
+def getFitness(individuo, clientes):
+    fitness = 0
+
+    for i in range(len(individuo) - 1):
+        cliente_atual = individuo[i]
+        proximo_cliente = individuo[i + 1]
 
         # Corrigindo a chamada da função calcularTempoEntrega() para passar apenas dois argumentos
         tempo_entrega = calcularTempoEntrega(proximo_cliente, clientes)
-        satisfacao = getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
-
-        satisfacao_clientes[cliente_atual] = satisfacao
-
-    return satisfacao_clientes
-"""
-def calcularTempoTolerancia(distancia):
-    return distancia * 0.75
-
-def avaliacaoRota(arr_ordem, clientes):
-    carga_maxima = 4  # Capacidade máxima do veículo
-    carga_atual = carga_maxima  # Inicia com a carga máxima
-    tempo_atual = 0  # Tempo de entrega inicial
-    fitness = 0  # Valor inicial do fitness
-
-    for i in range(len(arr_ordem) - 1):
-        cliente_atual = arr_ordem[i]
-        proximo_cliente = arr_ordem[i + 1]
-
-        posicao_cliente_atual = clientes[cliente_atual]['posicao']
-        posicao_proximo_cliente = clientes[proximo_cliente]['posicao']
-
-        # Calcula a distância entre os clientes
-        distancia_entre_clientes = getDistancia(*posicao_cliente_atual, *posicao_proximo_cliente)
-
-        # Calcula o tempo de tolerância
-        tempo_tolerancia = calcularTempoTolerancia(distancia_entre_clientes)
-
-        # Atualiza o tempo de entrega
-        tempo_atual += distancia_entre_clientes * 0.5
-
-        # Verifica se o tempo está dentro dos critérios
-        if tempo_atual <= tempo_tolerancia:
-            fitness += 1  # Aumenta o fitness se estiver dentro dos critérios
-        else:
-            fitness -= 1  # Penaliza se estiver fora dos critérios
-
-        # Atualiza a carga atual considerando o retorno à sede (cliente 0)
-        if proximo_cliente == 0:
-            carga_atual = carga_maxima
-        else:
-            carga_atual -= 1  # Diminui a carga para cada entrega realizada
-
-        # Verifica se a carga solicitada é maior do que a carga atual
-        if 'pedido' in clientes[proximo_cliente]:
-            # Verifica se a carga solicitada é maior do que a carga atual
-            if clientes[proximo_cliente]['pedido'] > carga_atual:
-                fitness -= 1  # Penaliza se a carga solicitada for maior que a carga atual
-        else:
-            # Se a chave 'pedido' não estiver presente, considere como uma carga não especificada
-            fitness -= 1  # Penaliza se a carga não estiver especificada
+        fitness += getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
 
     return fitness
 
-# Exemplo de ordem de entrega
-ordem_entrega = [0, 1, 2, 0, 3, 4, 0, 5, 0]
 
-# Chame a função para avaliar a rota
-fitness_rota = avaliacaoRota(ordem_entrega, clientes_30)
-print(f"Fitness da rota: {fitness_rota}")
+def cruzamento(pai1, pai2):
+    ponto_corte = random.randint(1, len(pai1) - 1)
+    filho = pai1[:ponto_corte] + pai2[ponto_corte:]
+    return filho
 
-"""
+def main(populacao, clientes):
+    individuos = []
+    novos = []
+    
+    # Avaliar a população e armazenar os indivíduos e seus fitness
+    for p in populacao:
+        f = getFitness(p[0], clientes)  # O fitness é o segundo elemento da lista p
+        individuos.append((p[0], f))
 
-# Chame a função corrigida passando os dados corretos dos clientes
-satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
+    # Ordenar os indivíduos com base no fitness
+    individuos_ordenados = sorted(individuos, key=lambda x: x[1], reverse=True)
+    
+    # Print em ordem decrescente
+    for individuo, fitness in individuos_ordenados:
+        print("Indivíduo:", individuo, "Fitness:", fitness)
+    
+    # Selecionar os quatro indivíduos com os maiores fitness
+    pai1 = individuos_ordenados[0][0]
+    pai2 = individuos_ordenados[1][0]
+    
+    print("Pais selecionados:", pai1, pai2)
 
-# Exibindo a satisfação de todos os clientes
-for cliente, satisfacao in satisfacao_todos_clientes.items():
-    print(f"Satisfação do cliente {cliente}: {satisfacao}")
+    # Realizar cruzamento e adicionar o filho à lista de novos
+    novo_filho = cruzamento(pai1, pai2)
+    novos.append((novo_filho, 0))  # O fitness inicial é definido como 0, pode ser recalculado posteriormente
+
+    # Print do filho gerado
+    print("Filho gerado:", novo_filho)
+
+# Exemplo de uso
+tamanho_populacao = 5
+populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
+main(populacao_inicial, cliente_atual)
 
 
-# Calculando a satisfação de todos os clientes
-satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
 
-# Exibindo a satisfação de todos os clientes
-for cliente, satisfacao in satisfacao_todos_clientes.items():
-    print(f"Satisfação do cliente {cliente}: {satisfacao}")
 
+    
+    
+    #selecionar os melhores (2 ou 4) -> novos (feito)
+    #cruzamento -> novos  (feito)
+    #criar mais -> novos
+    #mutacao de novos
+    #criterios atendidos 
+        #sim - exibem
+        #nao - main(novo, clientes)
+    
+
+
+ #populacao = inicializarPopulacao(10, clientes_30) 
+ 
+ 
+#for c in list(clientes_30.values()):
+ #   print(c['posicao'])
 
