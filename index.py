@@ -52,9 +52,6 @@ def getSatisfacao(cliente1, cliente2, tempo_entrega, clientes):
         return 8  # Saída para entrega entre a metade e o tempo de tolerância
 
 
-
-
-
 # Base de dados dos clientes
 clientes_5 = {
     0: {'posicao': [0, 0]},  # Sede da empresa
@@ -127,6 +124,63 @@ def getSatisfacaoTodosClientes(clientes):
         satisfacao_clientes[cliente_atual] = satisfacao
 
     return satisfacao_clientes
+"""
+def calcularTempoTolerancia(distancia):
+    return distancia * 0.75
+
+def avaliacaoRota(arr_ordem, clientes):
+    carga_maxima = 4  # Capacidade máxima do veículo
+    carga_atual = carga_maxima  # Inicia com a carga máxima
+    tempo_atual = 0  # Tempo de entrega inicial
+    fitness = 0  # Valor inicial do fitness
+
+    for i in range(len(arr_ordem) - 1):
+        cliente_atual = arr_ordem[i]
+        proximo_cliente = arr_ordem[i + 1]
+
+        posicao_cliente_atual = clientes[cliente_atual]['posicao']
+        posicao_proximo_cliente = clientes[proximo_cliente]['posicao']
+
+        # Calcula a distância entre os clientes
+        distancia_entre_clientes = getDistancia(*posicao_cliente_atual, *posicao_proximo_cliente)
+
+        # Calcula o tempo de tolerância
+        tempo_tolerancia = calcularTempoTolerancia(distancia_entre_clientes)
+
+        # Atualiza o tempo de entrega
+        tempo_atual += distancia_entre_clientes * 0.5
+
+        # Verifica se o tempo está dentro dos critérios
+        if tempo_atual <= tempo_tolerancia:
+            fitness += 1  # Aumenta o fitness se estiver dentro dos critérios
+        else:
+            fitness -= 1  # Penaliza se estiver fora dos critérios
+
+        # Atualiza a carga atual considerando o retorno à sede (cliente 0)
+        if proximo_cliente == 0:
+            carga_atual = carga_maxima
+        else:
+            carga_atual -= 1  # Diminui a carga para cada entrega realizada
+
+        # Verifica se a carga solicitada é maior do que a carga atual
+        if 'pedido' in clientes[proximo_cliente]:
+            # Verifica se a carga solicitada é maior do que a carga atual
+            if clientes[proximo_cliente]['pedido'] > carga_atual:
+                fitness -= 1  # Penaliza se a carga solicitada for maior que a carga atual
+        else:
+            # Se a chave 'pedido' não estiver presente, considere como uma carga não especificada
+            fitness -= 1  # Penaliza se a carga não estiver especificada
+
+    return fitness
+
+# Exemplo de ordem de entrega
+ordem_entrega = [0, 1, 2, 0, 3, 4, 0, 5, 0]
+
+# Chame a função para avaliar a rota
+fitness_rota = avaliacaoRota(ordem_entrega, clientes_30)
+print(f"Fitness da rota: {fitness_rota}")
+
+"""
 
 # Chame a função corrigida passando os dados corretos dos clientes
 satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
@@ -142,3 +196,5 @@ satisfacao_todos_clientes = getSatisfacaoTodosClientes(clientes_30)
 # Exibindo a satisfação de todos os clientes
 for cliente, satisfacao in satisfacao_todos_clientes.items():
     print(f"Satisfação do cliente {cliente}: {satisfacao}")
+
+
