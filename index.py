@@ -146,9 +146,21 @@ def getFitness(individuo, clientes):
 
 
 def cruzamento(pai1, pai2):
-    ponto_corte = random.randint(1, len(pai1) - 1)
-    filho = pai1[:ponto_corte] + pai2[ponto_corte:]
-    return filho
+    ponto_corte1 = random.randint(1, len(pai1) - 1)
+    ponto_corte2 = random.randint(1, len(pai2) - 1)
+
+    filho1 = pai1[:ponto_corte1] + pai2[ponto_corte1:]
+    filho2 = pai2[:ponto_corte2] + pai1[ponto_corte2:]
+
+    return filho1, filho2
+
+def mutacao(individuo):
+    # Trocando aleatoriamente duas posições no indivíduo
+    posicao1 = random.randint(0, len(individuo) - 1)
+    posicao2 = random.randint(0, len(individuo) - 1)
+    individuo[posicao1], individuo[posicao2] = individuo[posicao2], individuo[posicao1]
+    return individuo
+
 
 def main(populacao, clientes):
     individuos = []
@@ -166,32 +178,47 @@ def main(populacao, clientes):
     for individuo, fitness in individuos_ordenados:
         print("Indivíduo:", individuo, "Fitness:", fitness)
     
-    # Selecionar os quatro indivíduos com os maiores fitness
+    # Selecionar os dois indivíduos com os maiores fitness
     pai1 = individuos_ordenados[0][0]
     pai2 = individuos_ordenados[1][0]
     
     print("Pais selecionados:", pai1, pai2)
 
-    # Realizar cruzamento e adicionar o filho à lista de novos
-    novo_filho = cruzamento(pai1, pai2)
-    novos.append((novo_filho, 0))  # O fitness inicial é definido como 0, pode ser recalculado posteriormente
+    # Realizar cruzamento e adicionar os quatro filhos à lista de novos
+    for _ in range(2):
+        filho1, filho2 = cruzamento(pai1, pai2)
+        novos.append((filho1, 0))  # O fitness inicial é definido como 0, pode ser recalculado posteriormente
+        novos.append((filho2, 0)) 
 
-    # Print do filho gerado
-    print("Filho gerado:", novo_filho)
+        # Print dos filhos gerados
+        print("Filho gerado:", filho1)
+        print("Filho gerado:", filho2)
 
+    # Adicionar os quatro filhos gerados à lista 'novos'
+    filho3, filho4 = cruzamento(pai1, pai2)
+    novos.append((filho3, 0))
+    novos.append((filho4, 0))
+
+    # Imprimir a lista 'novos' após adicionar os filhos
+    print("Lista 'novos' com filhos adicionados:", novos)
+
+    # Aplicar a mutação com 30% de probabilidade para cada indivíduo em 'novos'
+    for i in range(len(novos)):
+        if random.random() < 0.3:  # Probabilidade de 30%
+            novos[i] = (mutacao(novos[i][0]), 0)
+
+    # Imprimir a lista 'novos' após adicionar os filhos e aplicar a mutação
+    print("Lista 'novos' com filhos e mutação:", novos)
+    
 # Exemplo de uso
 tamanho_populacao = 5
 populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
 main(populacao_inicial, cliente_atual)
 
-
-
-
     
-    
-    #selecionar os melhores (2 ou 4) -> novos (feito)
-    #cruzamento -> novos  (feito)
-    #criar mais -> novos
+    #selecionar os melhores (2 ou 4) -> novos (feito - escolhendo 2 pais)
+    #cruzamento -> novos  (feito) 
+    #criar mais -> novos cruzando 2 pais resulta em 4 filhos
     #mutacao de novos
     #criterios atendidos 
         #sim - exibem
