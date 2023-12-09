@@ -161,74 +161,73 @@ def mutacao(individuo):
     individuo[posicao1], individuo[posicao2] = individuo[posicao2], individuo[posicao1]
     return individuo
 
+def criterio_parada(populacao, geracao_atual, max_geracoes=10, fitness_minimo=300):
+    # Adicione aqui sua lógica de critério de parada
+    melhores_fitness = [getFitness(individuo[0], cliente_atual) for individuo in populacao]
+    
+    if max(melhores_fitness) >= fitness_minimo or geracao_atual >= max_geracoes:
+        return True
+    else:
+        return False
 
 def main(populacao, clientes):
     individuos = []
     novos = []
+    geracao = 0
     
-    # Avaliar a população e armazenar os indivíduos e seus fitness
-    for p in populacao:
-        f = getFitness(p[0], clientes)  # O fitness é o segundo elemento da lista p
-        individuos.append((p[0], f))
+    while geracao < 10:  # Critério de parada: 10 gerações
+        # Avaliar a população e armazenar os indivíduos e seus fitness
+        for p in populacao:
+            f = getFitness(p[0], clientes)  # O fitness é o segundo elemento da lista p
+            individuos.append((p[0], f))
 
-    # Ordenar os indivíduos com base no fitness
-    individuos_ordenados = sorted(individuos, key=lambda x: x[1], reverse=True)
+        # Ordenar os indivíduos com base no fitness
+        individuos_ordenados = sorted(individuos, key=lambda x: x[1], reverse=True)
+        
+        # Selecionar os dois indivíduos com os maiores fitness
+        pai1 = individuos_ordenados[0][0]
+        pai2 = individuos_ordenados[1][0]
+
+        # Realizar cruzamento e adicionar os quatro filhos à lista de novos
+        for _ in range(2):
+            filho1, filho2 = cruzamento(pai1, pai2)
+            fitness_filho1 = getFitness(filho1, clientes)
+            fitness_filho2 = getFitness(filho2, clientes)
+            novos.append((filho1, fitness_filho1))
+            novos.append((filho2, fitness_filho2)) 
+
+        # Adicionar os quatro filhos gerados à lista 'novos'
+        filho3, filho4 = cruzamento(pai1, pai2)
+        fitness_filho3 = getFitness(filho3, clientes)
+        fitness_filho4 = getFitness(filho4, clientes)
+        novos.append((filho3, fitness_filho3))
+        novos.append((filho4, fitness_filho4))
+
+        # Aplicar a mutação com 30% de probabilidade para cada indivíduo em 'novos'
+        for i in range(len(novos)):
+            if random.random() < 0.3:  # Probabilidade de 30%
+                novos[i] = (mutacao(novos[i][0]), 0)
+
+        # Imprimir a lista 'novos' apenas se algum indivíduo atingiu o critério
+        for individuo, fitness in novos:
+            if fitness >= 300:
+                print("Indivíduo que atingiu o critério:", individuo, "Fitness:", fitness)
+                print("Critério de parada atingido. Fitness >= 300.")
+                return
+
+        # Atualizar a população com os novos indivíduos
+        populacao = novos
+        novos = []  # Limpar a lista de novos para a próxima geração
+        geracao += 1
     
-    # Print em ordem decrescente
-    for individuo, fitness in individuos_ordenados:
-        print("Indivíduo:", individuo, "Fitness:", fitness)
-    
-    # Selecionar os dois indivíduos com os maiores fitness
-    pai1 = individuos_ordenados[0][0]
-    pai2 = individuos_ordenados[1][0]
-    
-    print("Pais selecionados:", pai1, pai2)
-
-    # Realizar cruzamento e adicionar os quatro filhos à lista de novos
-    for _ in range(2):
-        filho1, filho2 = cruzamento(pai1, pai2)
-        novos.append((filho1, 0))  # O fitness inicial é definido como 0, pode ser recalculado posteriormente
-        novos.append((filho2, 0)) 
-
-        # Print dos filhos gerados
-        print("Filho gerado:", filho1)
-        print("Filho gerado:", filho2)
-
-    # Adicionar os quatro filhos gerados à lista 'novos'
-    filho3, filho4 = cruzamento(pai1, pai2)
-    novos.append((filho3, 0))
-    novos.append((filho4, 0))
-
-    # Imprimir a lista 'novos' após adicionar os filhos
-    print("Lista 'novos' com filhos adicionados:", novos)
-
-    # Aplicar a mutação com 30% de probabilidade para cada indivíduo em 'novos'
-    for i in range(len(novos)):
-        if random.random() < 0.3:  # Probabilidade de 30%
-            novos[i] = (mutacao(novos[i][0]), 0)
-
-    # Imprimir a lista 'novos' após adicionar os filhos e aplicar a mutação
-    print("Lista 'novos' com filhos e mutação:", novos)
+    # Imprimir quando o critério de 10 gerações for atingido
+    if geracao==10:
+        melhor_individuo, melhor_fitness = individuos_ordenados[0]
+        print(f"Melhor indivíduo da geração {geracao} Fitness: {melhor_fitness}")
+        print("Indivíduo:", melhor_individuo)
+        print("Critério de parada atingido. 10 gerações completas.")
     
 # Exemplo de uso
-tamanho_populacao = 5
+tamanho_populacao = 8
 populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
 main(populacao_inicial, cliente_atual)
-
-    
-    #selecionar os melhores (2 ou 4) -> novos (feito - escolhendo 2 pais)
-    #cruzamento -> novos  (feito) 
-    #criar mais -> novos cruzando 2 pais resulta em 4 filhos
-    #mutacao de novos
-    #criterios atendidos 
-        #sim - exibem
-        #nao - main(novo, clientes)
-    
-
-
- #populacao = inicializarPopulacao(10, clientes_30) 
- 
- 
-#for c in list(clientes_30.values()):
- #   print(c['posicao'])
-
