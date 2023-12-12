@@ -1,5 +1,7 @@
 import random
+import random
 import math
+random.seed(10)
 random.seed(10)
 
 # Base de dados dos clientes
