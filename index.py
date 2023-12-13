@@ -1,8 +1,7 @@
 import random
-import random
 import math
 random.seed(10)
-random.seed(10)
+
 
 # Base de dados dos clientes
 clientes_5 = {
@@ -11,7 +10,6 @@ clientes_5 = {
     2: {'posicao': [30, 4], 'pedido': 1},
     3: {'posicao': [10, 0], 'pedido': 3},
     4: {'posicao': [15, 20], 'pedido': 2},
-    5: {'posicao': [5, 7], 'pedido': 5}
 }
 
 # Base de dados dos clientes (10 clientes)
@@ -21,12 +19,11 @@ clientes_10 = {
     2: {'posicao': [30, 4], 'pedido': 1},
     3: {'posicao': [10, 0], 'pedido': 3},
     4: {'posicao': [15, 20], 'pedido': 2},
-    5: {'posicao': [5, 7], 'pedido': 5},
+    5: {'posicao': [5, 7], 'pedido': 1},
     6: {'posicao': [25, 15], 'pedido': 2},
     7: {'posicao': [8, 3], 'pedido': 3},
     8: {'posicao': [20, 10], 'pedido': 1},
     9: {'posicao': [18, 18], 'pedido': 4},
-    10: {'posicao': [2, 25], 'pedido': 3},
 }
 
 clientes_30 = {
@@ -49,17 +46,21 @@ clientes_30 = {
     16: {'posicao': [19, 19], 'pedido': 2},
     17: {'posicao': [22, 7], 'pedido': 3},
     18: {'posicao': [4, 28], 'pedido': 1},
+    19: {'posicao': [8, 3], 'pedido': 3},
     20: {'posicao': [27, 25], 'pedido': 3},
-    21: {'posicao': [3, 9], 'pedido': 4},
+    21: {'posicao': [3, 9], 'pedido': 1},
+    22: {'posicao': [8, 10], 'pedido': 4},
     23: {'posicao': [16, 21], 'pedido': 1},
+    24: {'posicao': [20, 20], 'pedido': 1},
     25: {'posicao': [26, 2], 'pedido': 4},
+    26: {'posicao': [2, 6], 'pedido': 1},
     27: {'posicao': [21, 17], 'pedido': 3},
     28: {'posicao': [13, 24], 'pedido': 1},
     29: {'posicao': [25, 15], 'pedido': 2},
-    30: {'posicao': [8, 3], 'pedido': 3}
 }
+
 #Facilitar na hora de rodar outro banco de dados
-cliente_atual = clientes_30
+cliente_atual = clientes_5
 
 # Função para calcular a distância euclidiana entre dois pontos
 def getDistancia(x1, y1, x2, y2):
@@ -136,20 +137,27 @@ def inicializarPopulacao(tamanho_populacao, clientes):
 
     return populacao
 
-
 def getFitness(individuo, clientes):
     fitness = 0
     capacidade = 0  # Declaração da variável capacidade
+    clientes_visitados = set()
 
     for i in range(len(individuo) - 1):
         cliente_atual = individuo[i]
         proximo_cliente = individuo[i + 1]
+
+        # Penalizar se qualquer cliente (exceto a sede) aparecer mais de uma vez
+        if cliente_atual != 0 and cliente_atual in clientes_visitados:
+            fitness -= 120  # Penalidade por cliente repetido
+
+        clientes_visitados.add(cliente_atual)
+
         if(cliente_atual == 0) & (proximo_cliente == 0):
-            fitness -= 100
-            
+            fitness -= 100  # Penalidade por dois pontos de entrega consecutivos sendo a sede
+
         tempo_entrega = calcularTempoEntrega(proximo_cliente, clientes)
         fitness += getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
-       
+
         if cliente_atual == 0:  # Verifique se o cliente atual é a sede
             capacidade = 4  # Atribua 4 à capacidade
         else:
@@ -157,7 +165,11 @@ def getFitness(individuo, clientes):
             if capacidade >= clientes[cliente_atual]['pedido']:
                 capacidade -= clientes[cliente_atual]['pedido']  # Atualize a capacidade
             else:
-                fitness -= 50  # Aplique uma punição no fitness (-50) se a capacidade não for suficiente
+                fitness -= 100  # Aplique uma punição no fitness (-50) se a capacidade não for suficiente
+
+    # Penalize por clientes que não foram visitados
+    clientes_nao_visitados = set(clientes.keys()) - clientes_visitados
+    fitness -= len(clientes_nao_visitados) * 100  # Penalidade fixa para cada cliente não visitado
 
     return fitness
 
@@ -165,9 +177,6 @@ def getFitness(individuo, clientes):
 def cruzamento(pai1, pai2):
     ponto_corte1 = random.randint(1, len(pai1) - 1)
     ponto_corte2 = random.randint(1, len(pai2) - 1)
-    #OBSERVACAO
-    #aqui deveria ser ponto_corte no primeiro e no segundo deveria ser o que sobrou (ponto_corte até tamanho),
-    # pois assim vcs estão gerando filhos maiores que os pais, possivelmente com redundancia de entregas. 
     filho1 = pai1[:ponto_corte1] + pai2[ponto_corte1:]
     filho2 = pai2[:ponto_corte2] + pai1[ponto_corte2:]
 
@@ -177,8 +186,7 @@ def mutacao(individuo):
     # Trocando aleatoriamente duas posições no indivíduo
     posicao1 = random.randint(0, len(individuo) - 1)
     posicao2 = random.randint(0, len(individuo) - 1)
-    #OBSERVACAO
-    #aqui vc deve escolher dois valores elatórios que presentam os clientes ou a sede. Desse modo ficou quase um cruzamento. 
+    
     individuo[posicao1], individuo[posicao2] = individuo[posicao2], individuo[posicao1]
     return individuo
 
@@ -196,7 +204,7 @@ def main(populacao, clientes):
     novos = []
     geracao = 0
     ngeracoes = 5000
-    while geracao < ngeracoes:  # Critério de parada: 10 gerações
+    while geracao < ngeracoes:  # Critério de parada: x gerações
         # Avaliar a população e armazenar os indivíduos e seus fitness
         
         for p in populacao:
@@ -235,7 +243,7 @@ def main(populacao, clientes):
             f = getFitness(g[0], clientes)  # O fitness é o segundo elemento da lista p
             novos.append([g[0], f])
 
-        # Aplicar a mutação com 30% de probabilidade para cada indivíduo em 'novos'
+        # Aplicar a mutação com 50% de probabilidade para cada indivíduo em 'novos'
         for i in range(len(novos)):
             if random.random() < 0.5:  # Probabilidade de 30%
                 novos[i] = (mutacao(novos[i][0]), 0)
@@ -253,7 +261,7 @@ def main(populacao, clientes):
         novos = []  # Limpar a lista de novos para a próxima geração
         geracao += 1
     
-    # Imprimir quando o critério de 10 gerações for atingido
+    # Imprimir quando o critério de x gerações for atingido
     if geracao==ngeracoes:
         melhor_individuo, melhor_fitness = individuos_ordenados[0]
         print(f"Melhor indivíduo da geração {geracao} Fitness: {melhor_fitness}")
@@ -261,7 +269,7 @@ def main(populacao, clientes):
         print("Critério de parada atingido.",ngeracoes ,"gerações completas.")
     
 # Exemplo de uso
-tamanho_populacao = 8
+tamanho_populacao = 15
 populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
 main(populacao_inicial, cliente_atual)
 
