@@ -2,7 +2,6 @@ import random
 import math
 random.seed(10)
 
-
 # Base de dados dos clientes
 clientes_5 = {
     0: {'posicao': [0, 0]},  # Sede da empresa
@@ -60,7 +59,7 @@ clientes_30 = {
 }
 
 #Facilitar na hora de rodar outro banco de dados
-cliente_atual = clientes_5
+cliente_atual = clientes_30
 
 # Função para calcular a distância euclidiana entre dois pontos
 def getDistancia(x1, y1, x2, y2):
@@ -74,7 +73,6 @@ def getDistanciaEntreClientes(cliente1, cliente2, clientes):
 
 # Função para calcular o tempo de entrega entre a sede e um cliente
 def calcularTempoEntrega(cliente, clientes): 
-    #print(clientes)
     sede = clientes[0]['posicao']  # Posição da sede (índice 0)
    
     posicao_cliente = clientes[cliente]['posicao']  # Posição do cliente
@@ -124,9 +122,9 @@ def inicializarPopulacao(tamanho_populacao, clientes):
     clientes_ids = list(clientes.keys())  # Lista de IDs de clientes
 
     for _ in range(tamanho_populacao):
-        ordem_entrega = clientes_ids[:]# Ignorar a sede na ordem de entrega
+        ordem_entrega = clientes_ids[:] # Ignorar a sede na ordem de entrega
        
-        #adicionando voltas a sede
+        # Adicionando voltas a sede
         for _ in range( random.randint(1, len(clientes) )):
             ordem_entrega.insert(0, 0) 
             
@@ -139,7 +137,7 @@ def inicializarPopulacao(tamanho_populacao, clientes):
 
 def getFitness(individuo, clientes):
     fitness = 0
-    capacidade = 0  # Declaração da variável capacidade
+    capacidade = 0  
     clientes_visitados = set()
 
     for i in range(len(individuo) - 1):
@@ -165,7 +163,7 @@ def getFitness(individuo, clientes):
             if capacidade >= clientes[cliente_atual]['pedido']:
                 capacidade -= clientes[cliente_atual]['pedido']  # Atualize a capacidade
             else:
-                fitness -= 100  # Aplique uma punição no fitness (-50) se a capacidade não for suficiente
+                fitness -= 100  # Aplique uma punição no fitness se a capacidade não for suficiente
 
     # Penalize por clientes que não foram visitados
     clientes_nao_visitados = set(clientes.keys()) - clientes_visitados
@@ -183,7 +181,6 @@ def cruzamento(pai1, pai2):
     return filho1, filho2
 
 def mutacao(individuo):
-    # Trocando aleatoriamente duas posições no indivíduo
     posicao1 = random.randint(0, len(individuo) - 1)
     posicao2 = random.randint(0, len(individuo) - 1)
     
@@ -191,7 +188,6 @@ def mutacao(individuo):
     return individuo
 
 def criterio_parada(populacao, geracao_atual, max_geracoes=10, fitness_minimo=1000):
-    # Adicione aqui sua lógica de critério de parada
     melhores_fitness = [getFitness(individuo[0], cliente_atual) for individuo in populacao]
     
     if max(melhores_fitness) >= fitness_minimo or geracao_atual >= max_geracoes:
@@ -210,19 +206,15 @@ def main(populacao, clientes):
         for p in populacao:
             f = getFitness(p[0], clientes)  # O fitness é o segundo elemento da lista p
             individuos.append([p[0], f])
-            #print(p[0], "fitness", p[1])
 
         # Ordenar os indivíduos com base no fitness
         individuos_ordenados = sorted(individuos, key=lambda x: x[1], reverse=True)
 
-        #for p in populacao:
-            #print(p[0], "fitness", p[1])
-    
         # Selecionar os dois indivíduos com os maiores fitness
         pai1 = individuos_ordenados[0][0]
         pai2 = individuos_ordenados[1][0]
-        print("Melhor fitness: ", individuos_ordenados[0][1], "geracao: ", geracao)
-
+        print("Melhor fitness: ", individuos_ordenados[0][1], "/ Geração: ", geracao)
+        
         # Realizar cruzamento e adicionar os quatro filhos à lista de novos
         for _ in range(2):
             filho1, filho2 = cruzamento(pai1, pai2)
@@ -248,14 +240,6 @@ def main(populacao, clientes):
             if random.random() < 0.5:  # Probabilidade de 30%
                 novos[i] = (mutacao(novos[i][0]), 0)
 
-        # Imprimir a lista 'novos' apenas se algum indivíduo atingiu o critério
-        for individuo, fitness in novos:
-            if fitness >= 1000:
-                print("Indivíduo que atingiu o critério:", individuo, "Fitness:", fitness)
-                print("Critério de parada atingido. Fitness >= 300.")
-                return
-            
-
         # Atualizar a população com os novos indivíduos
         populacao = novos
         novos = []  # Limpar a lista de novos para a próxima geração
@@ -272,6 +256,3 @@ def main(populacao, clientes):
 tamanho_populacao = 15
 populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
 main(populacao_inicial, cliente_atual)
-
-#Melhor indivíduo da geração 1000 Fitness: 404
-#Indivíduo: [0, 0, 9, 0, 4, 0, 23, 30, 0, 1, 0, 0, 28, 30, 0, 27, 0, 0, 16, 0, 0, 14, 0, 15, 0, 1, 0, 0, 9, 0, 0, 20, 11, 0, 10, 8, 0, 27, 0, 6, 0, 25, 0, 16, 0, 0, 13, 0]
