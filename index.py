@@ -59,7 +59,7 @@ clientes_30 = {
 }
 
 #Facilitar na hora de rodar outro banco de dados
-cliente_atual = clientes_30
+cliente_atual = clientes_5
 
 # Função para calcular a distância euclidiana entre dois pontos
 def getDistancia(x1, y1, x2, y2):
@@ -146,15 +146,16 @@ def getFitness(individuo, clientes):
 
         # Penalizar se qualquer cliente (exceto a sede) aparecer mais de uma vez
         if cliente_atual != 0 and cliente_atual in clientes_visitados:
-            fitness -= 120  # Penalidade por cliente repetido
+            fitness -= 10  # Penalidade por cliente repetido #MUDEI
 
         clientes_visitados.add(cliente_atual)
 
         if(cliente_atual == 0) & (proximo_cliente == 0):
-            fitness -= 100  # Penalidade por dois pontos de entrega consecutivos sendo a sede
+            fitness -= 10  # Penalidade por dois pontos de entrega consecutivos sendo a sede
 
         tempo_entrega = calcularTempoEntrega(proximo_cliente, clientes)
-        fitness += getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
+        if(cliente_atual != 0):
+            fitness += getSatisfacao(cliente_atual, proximo_cliente, tempo_entrega, clientes)
 
         if cliente_atual == 0:  # Verifique se o cliente atual é a sede
             capacidade = 4  # Atribua 4 à capacidade
@@ -163,7 +164,7 @@ def getFitness(individuo, clientes):
             if capacidade >= clientes[cliente_atual]['pedido']:
                 capacidade -= clientes[cliente_atual]['pedido']  # Atualize a capacidade
             else:
-                fitness -= 100  # Aplique uma punição no fitness se a capacidade não for suficiente
+                fitness -= 10  # Aplique uma punição no fitness se a capacidade não for suficiente
 
     # Penalize por clientes que não foram visitados
     clientes_nao_visitados = set(clientes.keys()) - clientes_visitados
@@ -181,6 +182,7 @@ def cruzamento(pai1, pai2):
     return filho1, filho2
 
 def mutacao(individuo):
+   
     posicao1 = random.randint(0, len(individuo) - 1)
     posicao2 = random.randint(0, len(individuo) - 1)
     
@@ -200,6 +202,8 @@ def main(populacao, clientes):
     novos = []
     geracao = 0
     ngeracoes = 5000
+    #ADICIONEI
+    ind = 0
     while geracao < ngeracoes:  # Critério de parada: x gerações
         # Avaliar a população e armazenar os indivíduos e seus fitness
         
@@ -210,34 +214,40 @@ def main(populacao, clientes):
         # Ordenar os indivíduos com base no fitness
         individuos_ordenados = sorted(individuos, key=lambda x: x[1], reverse=True)
 
+        #novos.append(individuos_ordenados[0])
+        #novos.append(individuos_ordenados[1]) 
+        
         # Selecionar os dois indivíduos com os maiores fitness
         pai1 = individuos_ordenados[0][0]
         pai2 = individuos_ordenados[1][0]
         print("Melhor fitness: ", individuos_ordenados[0][1], "/ Geração: ", geracao)
-        
+        #ind += 2
         # Realizar cruzamento e adicionar os quatro filhos à lista de novos
-        for _ in range(2):
-            filho1, filho2 = cruzamento(pai1, pai2)
-            fitness_filho1 = getFitness(filho1, clientes)
-            fitness_filho2 = getFitness(filho2, clientes)
-            novos.append([filho1, fitness_filho1])
-            novos.append([filho2, fitness_filho2]) 
-
+        #MUDEI - nao precisa do for
+        filho1, filho2 = cruzamento(pai1, pai2)
+        fitness_filho1 = getFitness(filho1, clientes)
+        fitness_filho2 = getFitness(filho2, clientes)
+        novos.append([filho1, fitness_filho1])
+        novos.append([filho2, fitness_filho2]) 
+        #ADICIONEI
+        ind += 2
         # Adicionar os quatro filhos gerados à lista 'novos'
         filho3, filho4 = cruzamento(pai1, pai2)
         fitness_filho3 = getFitness(filho3, clientes)
         fitness_filho4 = getFitness(filho4, clientes)
         novos.append([filho3, fitness_filho3])
         novos.append([filho4, fitness_filho4])
-
-        gerados = inicializarPopulacao(4, clientes)
+        #ADICIONEI
+        ind += 2
+        #controlando. tamanho da populacao #MUDEI
+        gerados = inicializarPopulacao(tamanho_populacao - ind, clientes)
         for g in gerados:
             f = getFitness(g[0], clientes)  # O fitness é o segundo elemento da lista p
             novos.append([g[0], f])
 
         # Aplicar a mutação com 50% de probabilidade para cada indivíduo em 'novos'
         for i in range(len(novos)):
-            if random.random() < 0.5:  # Probabilidade de 30%
+            if random.random() < 0.5:  # Probabilidade de 50%
                 novos[i] = (mutacao(novos[i][0]), 0)
 
         # Atualizar a população com os novos indivíduos
@@ -253,6 +263,7 @@ def main(populacao, clientes):
         print("Critério de parada atingido.",ngeracoes ,"gerações completas.")
     
 # Exemplo de uso
-tamanho_populacao = 15
+#MUDEI
+tamanho_populacao = 50
 populacao_inicial = inicializarPopulacao(tamanho_populacao, cliente_atual)
 main(populacao_inicial, cliente_atual)
