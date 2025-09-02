@@ -42,6 +42,3 @@ O objetivo é simular rotas de entrega de uma empresa, considerando **distância
 
 
 Desenvolvido por Isadora Marques e Nathalia Miranda
-
-   git clone https://github.com/seu-usuario/nome-do-repositorio.git
-   cd nome-do-repositorio
