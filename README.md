@@ -3,6 +3,7 @@
 Projeto desenvolvido no **IFBA** como estudo de **algoritmos genéticos aplicados à logística**.  
 O objetivo é simular rotas de entrega de uma empresa, considerando **distâncias, tempos, capacidade de carga** e **satisfação dos clientes**, buscando a melhor solução por meio de heurísticas evolutivas.
 
+Link do relatório: https://docs.google.com/document/d/1SFv0HrVv957fRi3o-378RrRNt6CxLNdhpmH91yjcyu0/edit?usp=sharing
 ---
 
 ## 📌 Funcionalidades
